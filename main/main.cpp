@@ -68,7 +68,7 @@ Shader shaderTexture;
 Shader shaderHongo;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera());
-float distanceFromTarget = 7.0;
+float distanceFromTarget = 12.0;
 
 Box boxIntro;
 Sphere skyboxSphere(20, 20);
@@ -91,19 +91,29 @@ Model zombie;
 Model hongo;
 Model hongo2;
 
-Model labirynth;
+Model modelLamp1;//Arbol
+Model modelLamp2;//arbol
 
+Model modelArbol1; 
+Model modelArbol2;
+Model modelArbol3; 
+Model modelLaberinto;
+Model modelArbolGigant;
 // Terrain model instance
-Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
+Terrain terrain(-1, -1, 300, 2, "../Textures/NuevasTexturas/Mapa3v3.png");
+Terrain terrain2(-1, -1, 300, 8, "../Textures/NuevasTexturas/labe2.png");  
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
+GLuint textureCespedID;
 GLuint textureTerrainRID, textureTerrainGID, textureTerrainBID, textureTerrainBlendMapID;
 GLuint skyboxTextureID;
+GLuint textureInit1ID, textureInit2ID, textureActivaID, textureScreenID;
 
 GLuint textureHongoID;
 
 // Modelo para el render del texto
 FontTypeRendering::FontTypeRendering *modelText;
+
+bool iniciaPartida = false, presionarOpcion = false;
 
 GLenum types[6] = {
 GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -130,18 +140,14 @@ glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixZombie = glm::mat4(1.0f);
 
 glm::mat4 modelMatrixHongo = glm::mat4(1.0f);
-glm::mat4 modelMatrixLaberinto = glm::mat4(1.0f);
+
+glm::mat4 modelMatrixArrbolGrande = glm::mat4(1.0f);
+glm::mat4 modelMatrixLabe = glm::mat4(1.0f);
 
 int animationMayowIndex = 1;
 int modelSelected = 0;
 bool enableCountSelected = true;
 
-
-
-
-// Var animate lambo dor
-int stateDoor = 0;
-float dorRotCount = 0.0;
 
 double deltaTime;
 double currTime, lastTime;
@@ -156,13 +162,15 @@ double startTimeJump = 0;
 //Mostrar Hongo
 bool mostrarHongo = true;
 bool speedfast = false;
-float speedMayow = 0.07;
+float speedMayow = 0.2;
 int cont = 0;
 bool mkColision = true;	//realiza colision una sola vez
 
 int cont_Hongo_A = 0;
 int cont_Hongo_M = 0;
 
+
+//+++++++++++++++ Posiciones Hongos ++++++++++++++++++++++
 std::vector<glm::vec4> hongo_A_pos ={
 	glm::vec4(9.0, 0, -5.0, true),
 	glm::vec4(9.0, 0, -7.0, true),
@@ -174,22 +182,72 @@ std::vector<glm::vec4> hongo_M_pos ={
 	glm::vec4(7.0, 0, -7.0, true),
 	glm::vec4(7.0, 0, -9.0, true)
 };
+//+++++++++++++++ Terminan Posiciones Hongos ++++++++++++++++++++++
 
-// Hongos position
-// std::vector<glm::vec3> hongo_A_pos = {
-// 	glm::vec3(9.0, 0, -6.0),
-// 	glm::vec3(9.0, 0, -7.0),
-// 	glm::vec3(9.0, 0, -8.0)
-// };
+
+//++++++++++++++++++ Posiciones Arboles +++++++++++++++++++++++++++
+// Lamps position
+std::vector<glm::vec3> lamp1Position = {
+	glm::vec3(-7.03, 0, -19.14),
+	glm::vec3(24.41, 0, -34.57),
+	glm::vec3(-10.15, 0, -54.1)
+	
+};
+// proyecto 
+std::vector<glm::vec3> arboles1position = {
+	glm::vec3(246.2890625,0,-93.5546875),
+	glm::vec3(-90.0390625,0,96.2890625),
+	glm::vec3(-73.6328125,0,82.2265625),
+	glm::vec3(-55.46875,0,62.3046875),
+	glm::vec3(-44.921875,0,59.375),
+	glm::vec3(-43.75,0,42.3828125),
+	glm::vec3(93.359375,0,117.96875),
+	glm::vec3(69.921875,0,68.1640625),
+	glm::vec3(102.734375,0,140.8203125),
+	glm::vec3(85.7421875,0,161.9140625),
+	glm::vec3(100.9765625,0,195.3125),
+	glm::vec3(-35.546875,0,79.296875)
+	
+};
+std::vector<float>  arboles1Orientacion = {
+	-17.0, -82.67, 23.70
+};
+std::vector<glm::vec3> arboles2position = {
+	glm::vec3(-26.7578125,0,71.09375),
+	glm::vec3(-27.34375,0,50),
+	glm::vec3(-12.6953125,0,75.1953125),
+	glm::vec3(-6.25,0,59.375),
+	glm::vec3(2.5390625,0,74.609375),
+	glm::vec3(10.7421875,0,61.1328125),
+	glm::vec3(31.8359375,0,61.1328125),
+	glm::vec3(20.703125,0,78.125),
+	glm::vec3(-36.52, 0, -23.24),
+	glm::vec3(-52.73, 0, -3.90),
+	glm::vec3(134.375,0,194.140625),
+	glm::vec3(125.5859375,0,132.6171875),
+	glm::vec3(135.546875,0,150.78125),
+	glm::vec3(148.4375,0,154.296875),
+	glm::vec3(146.6796875,0,169.53125),
+	glm::vec3(164.84375,0,179.4921875)
+	
+};
+std::vector<float>  arboles2Orientacion = {
+	-17.0, -82.67, 23.70
+};
+std::vector<glm::vec3> arboles3position = {
+
+	
+};
+std::vector<float>  arboles3Orientacion = {
+	-17.0, -82.67, 23.70
+};
+//+++++++++++++++++++++ Terminan posiciones arboles +++++++++++++++++++++++++++++++++++
 
 // Colliders
 std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
 std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
 std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4, char> > coll_Hongo_SBB;
 
-// Variables animacion maquina de estados eclipse
-const float avance = 0.1;
-const float giroEclipse = 0.5f;
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -204,7 +262,7 @@ bool processInput(bool continueApplication = true);
 
 void hongos(){
 
-	// Render for the hongo model
+	// Render del hongo model
 	/******      HONGOS AMARILLOS      ******/
 	for(int i = 0; i < hongo_A_pos.size(); i++){
 		if(hongo_A_pos[i].w != false){	//El hongo esta inicializado por lo tanto = visible
@@ -450,38 +508,42 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	rayModel.setShader(&shader);
 	rayModel.setColor(glm::vec4(1.0));
 
-	boxCesped.init();
-	boxCesped.setShader(&shaderMulLighting);
-
-	boxWalls.init();
-	boxWalls.setShader(&shaderMulLighting);
-
-	boxHighway.init();
-	boxHighway.setShader(&shaderMulLighting);
-
-	boxLandingPad.init();
-	boxLandingPad.setShader(&shaderMulLighting);
-
-	esfera1.init();
-	esfera1.setShader(&shaderMulLighting);
-
 	boxIntro.init();
 	boxIntro.setShader(&shaderTexture);
 	boxIntro.setScale(glm::vec3(2.0, 2.0, 1.0));
 
+// +++++++++++++++++ Modelos Arboles ++++++++++++++++++++++++
+
+	//Lamps models
+	modelLamp1.loadModel("../models/arbol/arbol2.obj");
+	modelLamp1.setShader(&shaderMulLighting);
+	modelLamp2.loadModel("../models/arbol/arbol.obj");
+	modelLamp2.setShader(&shaderMulLighting);
+
+	modelArbol1.loadModel("../models/arbol/arbolv.obj");
+	modelArbol1.setShader(&shaderMulLighting);
+	modelArbol2.loadModel("../models/arbol/arbol2.obj");
+	modelArbol2.setShader(&shaderMulLighting);
+	modelArbol3.loadModel("../models/arbol/arbol1.obj");
+	modelArbol3.setShader(&shaderMulLighting);
+	modelLaberinto.loadModel("../models/labe/labe.obj");
+	modelLaberinto.setShader(&shaderMulLighting);
+	modelArbolGigant.loadModel("../models/arbgrande/arbgrande.obj");
+	modelArbolGigant.setShader(&shaderMulLighting);
+// +++++++++++++++++ Terminan Modelos Arboles ++++++++++++++++++++++++
 	// Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
 	// Zombie Model
 	zombie.loadModel("../models/zombie/zombie.obj");
-	zombie.setShader(&shaderMulLighting);
+	zombie.setShader(&shaderHongo);
 	
-	//Hongo
+	//Hongo Amarillo
 	hongo.loadModel("../models/Hongo/hongo.obj");
 	hongo.setShader(&shaderHongo);
 
-	//Hongo
+	//Hongo Morado
 	hongo2.loadModel("../models/Hongo/hongo2.obj");
 	hongo2.setShader(&shaderHongo);
 
@@ -492,7 +554,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Terreno
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
-
+	terrain2.init();
+	terrain2.setShader(&shaderTerrain);
 	
 
 	// Se inicializa el model de render text
@@ -557,115 +620,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Libera la memoria de la textura
 	textureCesped.freeImage();
 
-	// Definiendo la textura a utilizar
-	Texture textureWall("../Textures/whiteWall.jpg");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	textureWall.loadImage();
-	// Creando la textura con id 1
-	glGenTextures(1, &textureWallID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureWallID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (textureWall.getData()) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, textureWall.getChannels() == 3 ? GL_RGB : GL_RGBA, textureWall.getWidth(), textureWall.getHeight(), 0,
-		textureWall.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureWall.getData());
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureWall.freeImage();
-
-	// Definiendo la textura a utilizar
-	Texture textureWindow("../Textures/ventana.png");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	textureWindow.loadImage();
-	// Creando la textura con id 1
-	glGenTextures(1, &textureWindowID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureWindowID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (textureWindow.getData()) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, textureWindow.getChannels() == 3 ? GL_RGB : GL_RGBA, textureWindow.getWidth(), textureWindow.getHeight(), 0,
-		textureWindow.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureWindow.getData());
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureWindow.freeImage();
-
-	// Definiendo la textura a utilizar
-	Texture textureHighway("../Textures/highway.jpg");
-	// Carga el mapa de bits (FIBITMAP es el tipo de dato de la libreria)
-	textureHighway.loadImage();
-	// Creando la textura con id 1
-	glGenTextures(1, &textureHighwayID);
-	// Enlazar esa textura a una tipo de textura de 2D.
-	glBindTexture(GL_TEXTURE_2D, textureHighwayID);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Verifica si se pudo abrir la textura
-	if (textureHighway.getData()) {
-		// Transferis los datos de la imagen a memoria
-		// Tipo de textura, Mipmaps, Formato interno de openGL, ancho, alto, Mipmaps,
-		// Formato interno de la libreria de la imagen, el tipo de dato y al apuntador
-		// a los datos
-		glTexImage2D(GL_TEXTURE_2D, 0, textureHighway.getChannels() == 3 ? GL_RGB : GL_RGBA, textureHighway.getWidth(), textureHighway.getHeight(), 0,
-		textureHighway.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureHighway.getData());
-		// Generan los niveles del mipmap (OpenGL es el ecargado de realizarlos)
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else
-		std::cout << "Failed to load texture" << std::endl;
-	// Libera la memoria de la textura
-	textureHighway.freeImage();
-
-	// Definiendo la textura
-	Texture textureLandingPad("../Textures/landingPad.jpg");
-	textureLandingPad.loadImage(); // Cargar la textura
-	glGenTextures(1, &textureLandingPadID); // Creando el id de la textura del landingpad
-	glBindTexture(GL_TEXTURE_2D, textureLandingPadID); // Se enlaza la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Wrapping en el eje u
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Wrapping en el eje v
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Filtering de minimización
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Filtering de maximimizacion
-	if(textureLandingPad.getData()){
-		// Transferir los datos de la imagen a la tarjeta
-		glTexImage2D(GL_TEXTURE_2D, 0, textureLandingPad.getChannels() == 3 ? GL_RGB : GL_RGBA, textureLandingPad.getWidth(), textureLandingPad.getHeight(), 0,
-		textureLandingPad.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureLandingPad.getData());
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else 
-		std::cout << "Fallo la carga de textura" << std::endl;
-	textureLandingPad.freeImage(); // Liberamos memoria
 
 	// Defininiendo texturas del mapa de mezclas
 	// Definiendo la textura
-	Texture textureR("../Textures/mud.png");
+	Texture textureR("../Textures/NuevasTexturas/RProyecto.png");
 	textureR.loadImage(); // Cargar la textura
 	glGenTextures(1, &textureTerrainRID); // Creando el id de la textura del landingpad
 	glBindTexture(GL_TEXTURE_2D, textureTerrainRID); // Se enlaza la textura
@@ -684,7 +642,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureR.freeImage(); // Liberamos memoria
 
 	// Definiendo la textura
-	Texture textureG("../Textures/grassFlowers.png");
+	Texture textureG("../Textures/NuevasTexturas/G.jpg");
 	textureG.loadImage(); // Cargar la textura
 	glGenTextures(1, &textureTerrainGID); // Creando el id de la textura del landingpad
 	glBindTexture(GL_TEXTURE_2D, textureTerrainGID); // Se enlaza la textura
@@ -703,7 +661,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureG.freeImage(); // Liberamos memoria
 
 	// Definiendo la textura
-	Texture textureB("../Textures/path.png");
+	Texture textureB("../Textures/NuevasTexturas/R2.png");
 	textureB.loadImage(); // Cargar la textura
 	glGenTextures(1, &textureTerrainBID); // Creando el id de la textura del landingpad
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBID); // Se enlaza la textura
@@ -722,7 +680,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	textureB.freeImage(); // Liberamos memoria
 
 	// Definiendo la textura
-	Texture textureBlendMap("../Textures/blendMap.png");
+	Texture textureBlendMap("../Textures/NuevasTexturas/Mapa3RGB2.png");
 	textureBlendMap.loadImage(); // Cargar la textura
 	glGenTextures(1, &textureTerrainBlendMapID); // Creando el id de la textura del landingpad
 	glBindTexture(GL_TEXTURE_2D, textureTerrainBlendMapID); // Se enlaza la textura
@@ -740,6 +698,45 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Fallo la carga de textura" << std::endl;
 	textureBlendMap.freeImage(); // Liberamos memoria
 
+	
+//++++++++++++++++++++++++++++++++++++++ Texturas Menu de Inicio +++++++++++++++++++++++++++++++++++++++++++++++++++++
+	Texture textureIntro1("../Textures/NuevasTexturas/Intro1.png");// carga de menu personalisado 
+	textureIntro1.loadImage(); // Cargar la textura
+	glGenTextures(1, &textureInit1ID); // Creando el id de la textura del landingpad
+	glBindTexture(GL_TEXTURE_2D, textureInit1ID); // Se enlaza la textura
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Wrapping en el eje u
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Wrapping en el eje v
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Filtering de minimización
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Filtering de maximimizacion
+	if(textureIntro1.getData()){
+		// Transferir los datos de la imagen a la tarjeta
+		glTexImage2D(GL_TEXTURE_2D, 0, textureIntro1.getChannels() == 3 ? GL_RGB : GL_RGBA, textureIntro1.getWidth(), textureIntro1.getHeight(), 0,
+		textureIntro1.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureIntro1.getData());
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else 
+		std::cout << "Fallo la carga de textura" << std::endl;
+	textureIntro1.freeImage(); // Liberamos memoria
+
+	// Definiendo la textura
+	Texture textureIntro2("../Textures/NuevasTexturas/Intro2.png");// carga de menu personalizado
+	textureIntro2.loadImage(); // Cargar la textura
+	glGenTextures(1, &textureInit2ID); // Creando el id de la textura del landingpad
+	glBindTexture(GL_TEXTURE_2D, textureInit2ID); // Se enlaza la textura
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Wrapping en el eje u
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Wrapping en el eje v
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Filtering de minimización
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Filtering de maximimizacion
+	if(textureIntro2.getData()){
+		// Transferir los datos de la imagen a la tarjeta
+		glTexImage2D(GL_TEXTURE_2D, 0, textureIntro2.getChannels() == 3 ? GL_RGB : GL_RGBA, textureIntro2.getWidth(), textureIntro2.getHeight(), 0,
+		textureIntro2.getChannels() == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, textureIntro2.getData());
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else 
+		std::cout << "Fallo la carga de textura" << std::endl;
+	textureIntro2.freeImage(); // Liberamos memoria
+//++++++++++++++++++++++++++++++++++++++ Fin Texturas Menu de Inicio +++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
 void destroy() {
@@ -758,35 +755,37 @@ void destroy() {
 	// Basic objects Delete
 	skyboxSphere.destroy();
 	boxCesped.destroy();
-	boxWalls.destroy();
-	boxHighway.destroy();
-	boxLandingPad.destroy();
 	esfera1.destroy();
 	boxCollider.destroy();
 	sphereCollider.destroy();
 	rayModel.destroy();
+	boxIntro.destroy();
 
 	// Custom objects Delete
 	hongo.destroy();
-	labirynth.destroy();
-	boxIntro.destroy();
 	mayowModelAnimate.destroy();
 	zombie.destroy();
 
+	modelArbol1.destroy();
+	modelArbol2.destroy();
+	modelArbol3.destroy();
+	modelLaberinto.destroy();
+	modelArbolGigant.destroy();
+
 	// Terrains objects Delete
 	terrain.destroy();
+	terrain2.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &textureCespedID);
-	glDeleteTextures(1, &textureWallID);
-	glDeleteTextures(1, &textureWindowID);
-	glDeleteTextures(1, &textureHighwayID);
-	glDeleteTextures(1, &textureLandingPadID);
 	glDeleteTextures(1, &textureTerrainBID);
 	glDeleteTextures(1, &textureTerrainGID);
 	glDeleteTextures(1, &textureTerrainRID);
 	glDeleteTextures(1, &textureTerrainBlendMapID);
+	glDeleteTextures(1, &textureInit1ID);
+	glDeleteTextures(1, &textureInit2ID);
+	glDeleteTextures(1, &textureScreenID);
 
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -844,17 +843,34 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	if(!iniciaPartida){
+		bool presionarEnter = glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS;
+		if(textureActivaID == textureInit1ID && presionarEnter){
+			iniciaPartida = true;
+			textureActivaID = textureScreenID;
+		}
+		else if(!presionarOpcion && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){
+			presionarOpcion = true;
+			if(textureActivaID == textureInit1ID)
+				textureActivaID = textureInit2ID;
+			else if(textureActivaID == textureInit2ID)
+				textureActivaID = textureInit1ID;
+		}
+		else if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
+			presionarOpcion = false;
+	}
+
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
 		std::cout << "Esta presente el joystick" << std::endl;
 		int axesCount, buttonCount;
 		const float * axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
 		std::cout << "Número de ejes disponibles :=>" << axesCount << std::endl;
-		std::cout << "Left Stick X axis: " << axes[0] << std::endl;
-		std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
-		std::cout << "Left Trigger/L2: " << axes[2] << std::endl;
-		std::cout << "Right Stick X axis: " << axes[3] << std::endl;
-		std::cout << "Right Stick Y axis: " << axes[4] << std::endl;
-		std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
+		// std::cout << "Left Stick X axis: " << axes[0] << std::endl;
+		// std::cout << "Left Stick Y axis: " << axes[1] << std::endl;
+		// std::cout << "Left Trigger/L2: " << axes[2] << std::endl;
+		// std::cout << "Right Stick X axis: " << axes[3] << std::endl;
+		// std::cout << "Right Stick Y axis: " << axes[4] << std::endl;
+		// std::cout << "Right Trigger/R2: " << axes[5] << std::endl;
 
 		if(fabs(axes[1]) > 0.2){
 			modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -axes[1] * 0.1));
@@ -890,19 +906,6 @@ bool processInput(bool continueApplication) {
 	offsetX = 0;
 	offsetY = 0;
 
-	// Seleccionar modelo
-	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
-		enableCountSelected = false;
-		modelSelected++;
-		if(modelSelected > 1)
-			modelSelected = 0;
-		
-		std::cout << "modelSelected:" << modelSelected << std::endl;
-	}
-	else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE)
-		enableCountSelected = true;
-
-	
 
 	// Controles de mayow
 	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
@@ -933,7 +936,6 @@ bool processInput(bool continueApplication) {
 }
 
 
-
 void applicationLoop() {
 	bool psi = true;
 
@@ -948,6 +950,8 @@ void applicationLoop() {
 	modelMatrixZombie = glm::translate(modelMatrixZombie, glm::vec3(10.0f, 0.05f, -5.0f));
 
 	lastTime = TimeManager::Instance().GetTime();
+
+	textureActivaID = textureInit1ID;
 
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
@@ -968,17 +972,15 @@ void applicationLoop() {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 				(float) screenWidth / (float) screenHeight, 0.01f, 100.0f);
 
-		if(modelSelected == 1){
-			// axis = glm::axis(glm::quat_cast(modelMatrixDart));
-			// angleTarget = glm::angle(glm::quat_cast(modelMatrixDart));
-			// target = modelMatrixDart[3];
-		}
-		else{
+	//++++++++++++++++++++++++ Inicia Seleccion Personaje ++++++++++++++++++++++++++++++
+		if(modelSelected == 0){
 			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
 			target = modelMatrixMayow[3];
 		}
+	//++++++++++++++++++++++++ Termina Seleccion Personaje ++++++++++++++++++++++++++++++
 
+	//++++++++++++++++++++++++ Inicia Posicion Camara ++++++++++++++++++++++++++++++
 		if(std::isnan(angleTarget))
 			angleTarget = 0.0;
 		if(axis.y < 0)
@@ -989,7 +991,9 @@ void applicationLoop() {
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
 		glm::mat4 view = camera->getViewMatrix();
+	//++++++++++++++++++++++++ Termina Posicion Camara ++++++++++++++++++++++++++++++
 
+	//++++++++++++++++++++++++ Carga de Shaders ++++++++++++++++++++++++++++++++++++++
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
 		shader.setMatrix4("view", 1, false, glm::value_ptr(view));
@@ -1015,6 +1019,7 @@ void applicationLoop() {
 					glm::value_ptr(projection));
 		shaderHongo.setMatrix4("view", 1, false,
 				glm::value_ptr(view));
+	//++++++++++++++++++++++++ Termina Carga de Shaders ++++++++++++++++++++++++++++++++++++++
 
 		/*******************************************
 		 * Propiedades Luz direccional
@@ -1076,6 +1081,18 @@ void applicationLoop() {
 		 * Propiedades PointLights
 		 *******************************************/
 		
+		/************Render de imagen de frente**************/
+		if(!iniciaPartida){
+			shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
+			shaderTexture.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureActivaID);
+			shaderTexture.setInt("outTexture", 0);
+			boxIntro.render();
+			glfwSwapBuffers(window);
+			continue;
+		}
+		
 
 		/*******************************************
 		 * Terrain Cesped
@@ -1099,24 +1116,56 @@ void applicationLoop() {
 		shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(80, 80)));
 		terrain.setPosition(glm::vec3(100, 0, 100));
 		terrain.render();
-		shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
+		terrain2.setPosition(glm::vec3(150, 0, 150));
+		terrain2.render();
+		shaderTerrain.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(70, 70)));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		/*******************************************
 		 * Custom objects obj
 		 *******************************************/
 
-		glm::mat4 modelMatrixLaberinto = glm::mat4(modelMatrixLaberinto);
-		modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(1,0,1));
-		// modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(-29.415625,116.00078125,83.626953125));
-		
-		//modelMatrixLaberinto = glm::rotate(modelMatrixLaberinto, glm::radians(90.0f), glm::vec3(1, 0, 0)); 
-		//modelMatrixLaberinto = glm::scale(modelMatrixLaberinto, glm::vec3(2.0f));
-		//modelMatrixLaberinto = glm::rotate(modelMatrixLaberinto, glm::radians(90.0f), glm::vec3(0, 1, 0)); 
-		// modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(1,0,1));
-		labirynth.render(modelMatrixLaberinto);
 
 		glActiveTexture(GL_TEXTURE0);
+
+	// ++++++++++++++++++++++++++++++++++++++ Render de arboles +++++++++++++++++++++++++++++++++++++++++++++
+
+		for(int i = 0; i < arboles1position.size(); i++){
+			arboles1position[i].y = terrain.getHeightTerrain(arboles1position[i].x, arboles1position[i].z);
+			modelArbol1.setPosition(arboles1position[i]);
+			modelArbol1.setScale(glm::vec3(2.0));
+			modelArbol1.setOrientation(glm::vec3(0, arboles1Orientacion[i], 0));
+			modelArbol1.render();
+		}
+		for(int i = 0; i < arboles2position.size(); i++){
+			arboles2position[i].y = terrain.getHeightTerrain(arboles2position[i].x, arboles2position[i].z);
+			modelArbol2.setPosition(arboles2position[i]);
+			modelArbol2.setScale(glm::vec3(2.0));
+			modelArbol2.setOrientation(glm::vec3(0, arboles2Orientacion[i], 0));
+			modelArbol2.render();
+		}
+
+		for(int i = 0; i < arboles3position.size(); i++){
+			arboles3position[i].y = terrain.getHeightTerrain(arboles3position[i].x, arboles3position[i].z);
+			modelArbol3.setPosition(arboles3position[i]);
+			modelArbol3.setScale(glm::vec3(1.5));
+			modelArbol3.setOrientation(glm::vec3(0, arboles3Orientacion[i], 0));
+			modelArbol3.render();
+		}
+
+		glm::mat4 modelMatrixArbolGitant = glm::mat4(modelMatrixArrbolGrande);
+		modelMatrixArbolGitant = glm::translate(modelMatrixArbolGitant, glm::vec3(-100, 0.0, -140));
+		modelMatrixArbolGitant = glm::scale(modelMatrixArbolGitant, glm::vec3(4.0));
+		modelArbolGigant.render(modelMatrixArbolGitant);
+
+		glm::mat4 modelMatrixLaberinto = glm::mat4(modelMatrixLabe);
+		modelMatrixLaberinto = glm::translate(modelMatrixLaberinto, glm::vec3(-100,0,-160));
+
+		//render laberinto
+		modelMatrixLaberinto = glm::scale(modelMatrixLaberinto, glm::vec3(1.0f));
+		modelLaberinto.render(modelMatrixLaberinto);
+	// ++++++++++++++++++++++++++++++++++++++ Fin Render de arboles +++++++++++++++++++++++++++++++++++++++++++++
+
 
 		/*****************************************
 		 * Objetos animados por huesos
@@ -1139,7 +1188,6 @@ void applicationLoop() {
 		mayowModelAnimate.setAnimationIndex(animationMayowIndex);
 		mayowModelAnimate.render(modelMatrixMayowBody);
 		animationMayowIndex = 1;
-
 
 		
 		zombie.setScale(glm::vec3(3.0));
@@ -1167,6 +1215,42 @@ void applicationLoop() {
 		 * Creacion de colliders
 		 * IMPORTANT do this before interpolations
 		 *******************************************/
+
+
+	//+++++++++++++++++++++++++++++++++++++++ Colisiones de arboles ++++++++++++++++++++++++++++++++++++++++++++++++++ 
+		for (int i = 0; i < arboles1position.size(); i++){
+			AbstractModel::OBB Arbol1Collider;
+			glm::mat4 modelMatrixColliderArbol1 = glm::mat4(1.0);
+			modelMatrixColliderArbol1 = glm::translate(modelMatrixColliderArbol1, arboles1position[i]);
+			modelMatrixColliderArbol1 = glm::rotate(modelMatrixColliderArbol1, glm::radians(arboles1Orientacion[i]),
+					glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "ArbolModel1-" + std::to_string(i), Arbol1Collider, modelMatrixColliderArbol1);
+			// Set the orientation of collider before doing the scale
+			Arbol1Collider.u = glm::quat_cast(modelMatrixColliderArbol1);
+			modelMatrixColliderArbol1 = glm::scale(modelMatrixColliderArbol1, glm::vec3(2, 1, 2));// posicion de la caja 
+			modelMatrixColliderArbol1 = glm::translate(modelMatrixColliderArbol1, modelArbol1.getObb().c);
+			Arbol1Collider.c = glm::vec3(modelMatrixColliderArbol1[3]);
+			Arbol1Collider.e = modelArbol1.getObb().e * glm::vec3(0.1, 0.8, 0.1);  // tamaño de la caja de colision
+			std::get<0>(collidersOBB.find("ArbolModel1-" + std::to_string(i))->second) = Arbol1Collider;
+		}
+		// arboles 2 coliciones 
+		for (int i = 0; i < arboles2position.size(); i++){
+			AbstractModel::OBB Arbol2Collider;
+			glm::mat4 modelMatrixColliderArbol2 = glm::mat4(1.0);
+			modelMatrixColliderArbol2 = glm::translate(modelMatrixColliderArbol2, arboles2position[i]);
+			modelMatrixColliderArbol2 = glm::rotate(modelMatrixColliderArbol2, glm::radians(arboles2Orientacion[i]),
+					glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "ArbolModel2-" + std::to_string(i), Arbol2Collider, modelMatrixColliderArbol2);
+			// Set the orientation of collider before doing the scale
+			Arbol2Collider.u = glm::quat_cast(modelMatrixColliderArbol2);
+			modelMatrixColliderArbol2 = glm::scale(modelMatrixColliderArbol2, glm::vec3(2.0,1.0,2.0));// posicion de la caja deoluson modifica solo eje y para darle altura 
+			modelMatrixColliderArbol2 = glm::translate(modelMatrixColliderArbol2, modelArbol2.getObb().c);
+			Arbol2Collider.c = glm::vec3(modelMatrixColliderArbol2[3]);
+			Arbol2Collider.e = modelArbol2.getObb().e * glm::vec3(0.1, 0.8, 0.1);  // tamaño de la caja de colision
+			std::get<0>(collidersOBB.find("ArbolModel2-" + std::to_string(i))->second) = Arbol2Collider;
+		}
+	//+++++++++++++++++++++++++++++++++++++++ Termina Colisiones de arboles ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 		// Collider de mayow
 		AbstractModel::OBB mayowCollider;
@@ -1208,6 +1292,17 @@ void applicationLoop() {
 			sphereCollider.render(matrixCollider);
 		}
 
+		hongos();
+
+		/**********
+		 * Render de las transparencias
+		 */
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_CULL_FACE);
+	
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
 
 		/*********************Prueba de colisiones****************************/
 		for (std::map<std::string,
@@ -1227,8 +1322,7 @@ void applicationLoop() {
 			addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
 		}
 
-		for (std::map<std::string,
-			std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4>>::iterator it =
+		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4>>::iterator it =
 			collidersOBB.begin(); it != collidersOBB.end(); it++) {
 			bool isColision = false;
 			for (std::map<std::string,
@@ -1244,49 +1338,32 @@ void applicationLoop() {
 			addOrUpdateCollisionDetection(collisionDetection, it->first, isColision);
 		}
 
-		hongos();
 		
-		// for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4>>::iterator it = collidersSBB.begin();
-		// 		 it != collidersSBB.end(); it++) {
-		// 	bool isCollision = false;
-		// 	for (std::map<std::string,
-		// 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4>>::iterator jt =
-		// 		collidersOBB.begin(); jt != collidersOBB.end(); jt++) {
-		// 		if (testSphereOBox(std::get<0>(it->second), std::get<0>(jt->second))) {
-		// 			std::cout << "Hay colision del " << it->first << " y el modelo" <<
-		// 				jt->first << std::endl;
-		// 			isCollision = true;
-		// 			addOrUpdateCollisionDetection(collisionDetection, jt->first, true);
-		// 		}
-		// 	}
-		// 	addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
-		// }
-
+		
+		
 		std::map<std::string, bool>::iterator itCollision;
-		for (itCollision = collisionDetection.begin(); 
-			itCollision != collisionDetection.end(); itCollision++) {
-			std::map<std::string, std::tuple<AbstractModel::SBB, 
-				glm::mat4, glm::mat4>>::iterator sbbBuscado = 
-				collidersSBB.find(itCollision->first);
-			std::map<std::string, std::tuple<AbstractModel::OBB,
-				glm::mat4, glm::mat4>>::iterator obbBuscado =
-				collidersOBB.find(itCollision->first);
+		for (itCollision = collisionDetection.begin(); itCollision != collisionDetection.end(); itCollision++) {
+			
+			std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4>>::iterator sbbBuscado = collidersSBB.find(itCollision->first);
+			
+			std::map<std::string, std::tuple<AbstractModel::OBB,glm::mat4, glm::mat4>>::iterator obbBuscado = collidersOBB.find(itCollision->first);
+			
 			if (sbbBuscado != collidersSBB.end()) {
 				if (!itCollision->second) 
 					addOrUpdateColliders(collidersSBB, itCollision->first);
 			}
-			// if (obbBuscado != collidersOBB.end()) {
-			// 	if (!itCollision->second) 
-			// 		addOrUpdateColliders(collidersOBB, itCollision->first);
-			// 	else {
-			// 		if (itCollision->first.compare("mayow") == 0)
-			// 			modelMatrixMayow = std::get<1>(obbBuscado->second);
-			// 		if (itCollision->first.compare("dart") == 0)
-			// 			modelMatrixDart = std::get<1>(obbBuscado->second);
-			// 	}
-			// }
+			if (obbBuscado != collidersOBB.end()) {
+				if (!itCollision->second) 
+					addOrUpdateColliders(collidersOBB, itCollision->first);
+				else {
+					if (itCollision->first.compare("mayow") == 0)
+						modelMatrixMayow = std::get<1>(obbBuscado->second);
+				}
+			}
 		}
 
+
+	//++++++++++++++++++++++++++++++ Render Rayo Personaje ++++++++++++++++++++++++++++++++
 		glm::mat4 modelMatrixRayMay = glm::mat4(modelMatrixMayow);
 		modelMatrixRayMay = glm::translate(modelMatrixRayMay, glm::vec3(0, 1, 0));
 		float maxDistanceRay = 10.0;
@@ -1311,16 +1388,8 @@ void applicationLoop() {
 				<< std::endl;
 			}
 		}
-		
-		/************Render de imagen de frente**************/
-		// shaderTexture.setMatrix4("projection", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		// shaderTexture.setMatrix4("view", 1, false, glm::value_ptr(glm::mat4(1.0)));
-		// glActiveTexture(GL_TEXTURE0);
-		// glBindTexture(GL_TEXTURE_2D, textureActivaID);
-		// shaderTexture.setInt("outTexture", 0);
-		// glEnable(GL_BLEND);
-		// boxIntro.render();
-		// glDisable(GL_BLEND);
+	//+++++++++++++++++++++++++++++ Termina Rayo Personaje +++++++++++++++++++++++++++++++++
+
 
 		std::string hongos_A = std::to_string(cont_Hongo_A);
 		std::string hongos_M = std::to_string(cont_Hongo_M);
