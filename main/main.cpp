@@ -162,7 +162,10 @@ double startTimeJump = 0;
 //Mostrar Hongo
 bool mostrarHongo = true;
 bool speedfast = false;
-float speedMayow = 0.2;
+const float speedWalk = 0.25;
+const float speedRun = 0.35;
+float speedP = speedWalk;
+float speedP_rev = speedP - 0.1;
 int cont = 0;
 bool mkColision = true;	//realiza colision una sola vez
 
@@ -416,13 +419,13 @@ void hongos(){
 		}
 	}
 
-	//Codigo para modificar avance de personaje
+	//Codigo para modificar rapidez de personaje
 	if(speedfast){
-		speedMayow = 0.12f;
+		speedP = speedRun;
 		cont++;
 		if(cont >= 300){
 			cont = 0;
-			speedMayow = 0.07f;
+			speedP = speedWalk;
 			speedfast = false;
 		}
 	}
@@ -916,11 +919,11 @@ bool processInput(bool continueApplication) {
 		animationMayowIndex = 0;
 	}
 	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, speedMayow));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, speedP));
 		animationMayowIndex = 0;
 	}
 	else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, -speedMayow));
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, -speedP_rev));
 		animationMayowIndex = 0;
 	}
 
